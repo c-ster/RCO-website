@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { signIn } from "@/lib/auth";
 import { registerSchema, loginSchema } from "@/lib/validators/auth";
 import { redirect } from "next/navigation";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { AuthError } from "next-auth";
 
 export type ActionResult = {
   success: boolean;
@@ -45,11 +47,17 @@ export async function registerAction(
     },
   });
 
-  await signIn("credentials", {
-    email: parsed.data.email,
-    password: parsed.data.password,
-    redirect: false,
-  });
+  try {
+    await signIn("credentials", {
+      email: parsed.data.email,
+      password: parsed.data.password,
+      redirect: false,
+    });
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+    // Sign-in after register failed, but account was created
+    return { success: false, error: "Account created but login failed. Please sign in." };
+  }
 
   redirect("/dashboard");
 }
@@ -74,8 +82,14 @@ export async function loginAction(
       password: parsed.data.password,
       redirect: false,
     });
-  } catch {
-    return { success: false, error: "Invalid email or password." };
+  } catch (error) {
+    // IMPORTANT: Re-throw redirect errors so Next.js can handle them
+    if (isRedirectError(error)) throw error;
+    // Only treat AuthError as invalid credentials
+    if (error instanceof AuthError) {
+      return { success: false, error: "Invalid email or password." };
+    }
+    return { success: false, error: "An unexpected error occurred." };
   }
 
   redirect("/dashboard");

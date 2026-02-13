@@ -6,9 +6,12 @@ try {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   require("dotenv").config({ path: ".env.local" });
 } catch {
-  // dotenv not available in production, env vars are injected by Vercel
+  // dotenv not available in production
 }
 
 export default defineConfig({
   schema: path.join(__dirname, "prisma", "schema.prisma"),
+  datasource: {
+    url: process.env.DATABASE_URL!,
+  },
 });
