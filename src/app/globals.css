@@ -1,26 +1,118 @@
 @import "tailwindcss";
 
+/* --- NAV-FORGE Space Force Design Tokens --- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #030712;
+  --foreground: #e5e7eb;
+  --surface: #111827;
+  --surface-elevated: #1f2937;
+  --border: #374151;
+  --border-subtle: #1f2937;
+
+  /* Accent: Electric Blue */
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --accent-muted: #1e3a5f;
+
+  /* Signal colors */
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #06b6d4;
+
+  /* UCI tier colors */
+  --tier-high: #22c55e;
+  --tier-partial: #f59e0b;
+  --tier-non-responsive: #ef4444;
+
+  /* Typography */
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+
+  /* Glow effects */
+  --glow-blue: 0 0 20px rgba(59, 130, 246, 0.3);
+  --glow-cyan: 0 0 20px rgba(6, 182, 212, 0.3);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-muted: var(--accent-muted);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+  --color-tier-high: var(--tier-high);
+  --color-tier-partial: var(--tier-partial);
+  --color-tier-non-responsive: var(--tier-non-responsive);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* Selection color */
+::selection {
+  background: rgba(59, 130, 246, 0.3);
+  color: #f9fafb;
+}
+
+/* Wizard step transition animations */
+@keyframes step-fade-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes step-fade-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-step-forward {
+  animation: step-fade-in-right 0.3s ease-out;
+}
+
+.animate-step-backward {
+  animation: step-fade-in-left 0.3s ease-out;
 }

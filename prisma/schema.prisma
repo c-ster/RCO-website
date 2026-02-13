@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  SUBMITTER
+  REVIEWER
+  DIRECTOR
+}
+
+enum SubmissionStatus {
+  DRAFT
+  SUBMITTED
+  EVALUATING
+  EVALUATED
+  ARCHIVED
+}
+
+enum RecommendationTier {
+  HIGH_MATCH
+  PARTIAL_MATCH
+  NON_RESPONSIVE
+}
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  passwordHash String       @map("password_hash")
+  name         String?
+  role         Role         @default(SUBMITTER)
+  submissions  Submission[]
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Submission {
+  id                 String           @id @default(cuid())
+  userId             String           @map("user_id")
+  user               User             @relation(fields: [userId], references: [id])
+  capabilityText     String           @map("capability_text")
+  technicalVitals    Json             @map("technical_vitals")
+  digitalfoundryTags String[]         @map("digitalfoundry_tags")
+  status             SubmissionStatus @default(DRAFT)
+  evaluation         Evaluation?
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+
+  @@map("submissions")
+}
+
+model Evaluation {
+  id                      String             @id @default(cuid())
+  submissionId            String             @unique @map("submission_id")
+  submission              Submission         @relation(fields: [submissionId], references: [id])
+  uciTotal                Float              @map("uci_total")
+  strategicAlignment      Float              @map("strategic_alignment")
+  technicalMaturity       Float              @map("technical_maturity")
+  digitalfoundryViability Float              @map("digitalfoundry_viability")
+  reasoningTrace          Json               @map("reasoning_trace")
+  recommendation          RecommendationTier
+  digitalfoundryMatch     Json?              @map("digitalfoundry_match")
+  citations               Json               @default("[]")
+  summaryBlurb            String?            @map("summary_blurb")
+  createdAt               DateTime           @default(now()) @map("created_at")
+
+  @@map("evaluations")
+}
+
+model HostPlatform {
+  id               String   @id @default(cuid())
+  name             String
+  type             String
+  availableSlots   Json     @map("available_slots")
+  deploymentWindow Json     @map("deployment_window")
+  exerciseName     String?  @map("exercise_name")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@map("host_platforms")
+}
