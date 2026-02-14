@@ -33,13 +33,47 @@ interface SwapC {
   cooling?: string;
 }
 
+interface SoftwareDetails {
+  language?: string;
+  classification?: string;
+  integrationMethod?: string;
+  dataRequirements?: string;
+}
+
 interface TechnicalVitals {
+  capabilityType?: string;
   trlLevel?: number;
   costEstimate?: number;
   deploymentReadyMonths?: number;
   swapC?: SwapC;
+  softwareDetails?: SoftwareDetails;
+  additionalContext?: string;
   [key: string]: unknown;
 }
+
+const CAPABILITY_TYPE_LABELS: Record<string, string> = {
+  hardware: "Hardware / Physical System",
+  software: "Software / AI / ML",
+  hybrid: "Hybrid (Hardware + Software)",
+  service: "Service / Process / Methodology",
+};
+
+const CLASSIFICATION_LABELS: Record<string, string> = {
+  unclassified: "Unclassified",
+  cui: "CUI (Controlled Unclassified)",
+  secret: "Secret",
+  "top-secret": "Top Secret / SCI",
+};
+
+const INTEGRATION_LABELS: Record<string, string> = {
+  api: "API / REST / gRPC",
+  containerized: "Containerized (Docker / K8s)",
+  standalone: "Standalone Application",
+  embedded: "Embedded / On-device",
+  cloud: "Cloud-hosted (SaaS / PaaS)",
+  sdk: "SDK / Library",
+  other: "Other",
+};
 
 interface Citation {
   source?: string;
@@ -298,6 +332,17 @@ export default async function SubmissionDetailPage({ params }: Props) {
       {technicalVitals && (
         <Card variant="elevated" header="Technical Vitals">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Capability Type */}
+            {technicalVitals.capabilityType && (
+              <div className="p-3 rounded-lg bg-surface border border-border-subtle sm:col-span-2">
+                <p className="text-xs text-text-muted uppercase tracking-wider mb-1">
+                  Capability Type
+                </p>
+                <p className="text-sm font-semibold text-accent">
+                  {CAPABILITY_TYPE_LABELS[technicalVitals.capabilityType] ?? technicalVitals.capabilityType}
+                </p>
+              </div>
+            )}
             {technicalVitals.trlLevel != null && (
               <div className="p-3 rounded-lg bg-surface border border-border-subtle">
                 <p className="text-xs text-text-muted uppercase tracking-wider mb-1">
@@ -328,6 +373,7 @@ export default async function SubmissionDetailPage({ params }: Props) {
                 </p>
               </div>
             )}
+            {/* SWaP-C Section */}
             {technicalVitals.swapC && (
               <div className="p-3 rounded-lg bg-surface border border-border-subtle sm:col-span-2">
                 <p className="text-xs text-text-muted uppercase tracking-wider mb-2">
@@ -361,19 +407,55 @@ export default async function SubmissionDetailPage({ params }: Props) {
                 </div>
               </div>
             )}
-            {/* Render any additional vitals */}
-            {Object.entries(technicalVitals)
-              .filter(([key]) => !["trlLevel", "costEstimate", "deploymentReadyMonths", "swapC"].includes(key))
-              .map(([key, value]) => (
-                <div key={key} className="p-3 rounded-lg bg-surface border border-border-subtle">
-                  <p className="text-xs text-text-muted uppercase tracking-wider mb-1">
-                    {key.replace(/([A-Z])/g, " $1").trim()}
-                  </p>
-                  <p className="text-sm font-medium text-text-primary">
-                    {typeof value === "object" ? JSON.stringify(value) : String(value)}
-                  </p>
+            {/* Software Details Section */}
+            {technicalVitals.softwareDetails && (
+              <div className="p-3 rounded-lg bg-surface border border-border-subtle sm:col-span-2">
+                <p className="text-xs text-text-muted uppercase tracking-wider mb-2">
+                  Software &amp; Integration Details
+                </p>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  {technicalVitals.softwareDetails.language && (
+                    <div>
+                      <span className="text-text-muted text-xs">Language / Framework:</span>{" "}
+                      <span className="text-text-primary">{technicalVitals.softwareDetails.language}</span>
+                    </div>
+                  )}
+                  {technicalVitals.softwareDetails.classification && (
+                    <div>
+                      <span className="text-text-muted text-xs">Classification:</span>{" "}
+                      <span className="text-text-primary">
+                        {CLASSIFICATION_LABELS[technicalVitals.softwareDetails.classification] ?? technicalVitals.softwareDetails.classification}
+                      </span>
+                    </div>
+                  )}
+                  {technicalVitals.softwareDetails.integrationMethod && (
+                    <div>
+                      <span className="text-text-muted text-xs">Integration:</span>{" "}
+                      <span className="text-text-primary">
+                        {INTEGRATION_LABELS[technicalVitals.softwareDetails.integrationMethod] ?? technicalVitals.softwareDetails.integrationMethod}
+                      </span>
+                    </div>
+                  )}
+                  {technicalVitals.softwareDetails.dataRequirements && (
+                    <div>
+                      <span className="text-text-muted text-xs">Data Requirements:</span>{" "}
+                      <span className="text-text-primary">{technicalVitals.softwareDetails.dataRequirements}</span>
+                    </div>
+                  )}
                 </div>
-              ))}
+              </div>
+            )}
+            {/* Additional Context */}
+            {technicalVitals.additionalContext && (
+              <div className="p-3 rounded-lg bg-surface border border-border-subtle sm:col-span-2">
+                <p className="text-xs text-text-muted uppercase tracking-wider mb-1">
+                  Additional Technical Context
+                </p>
+                <p className="text-sm text-text-primary whitespace-pre-wrap leading-relaxed">
+                  {technicalVitals.additionalContext}
+                </p>
+              </div>
+            )}
           </div>
         </Card>
       )}

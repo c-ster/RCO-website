@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import {
-  DIGITALFOUNDRY_TAG_OPTIONS,
+  DIGITALFOUNDRY_TAG_GROUPS,
   type SubmissionStep3,
 } from "@/lib/validators/submission";
 
@@ -35,28 +35,38 @@ export function StepTags({ data, errors, onChange }: StepTagsProps) {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-        {DIGITALFOUNDRY_TAG_OPTIONS.map((tag) => {
-          const isSelected = selectedTags.includes(tag);
-          return (
-            <button
-              key={tag}
-              type="button"
-              onClick={() => toggleTag(tag)}
-              className={cn(
-                "px-3 py-2 rounded-lg text-sm font-medium",
-                "border transition-all duration-150",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-                "cursor-pointer",
-                isSelected
-                  ? "bg-accent/15 text-accent border-accent shadow-[0_0_10px_rgba(59,130,246,0.2)]"
-                  : "bg-surface-elevated text-text-secondary border-border-subtle hover:border-border hover:text-text-primary"
-              )}
-            >
-              {tag}
-            </button>
-          );
-        })}
+      {/* Grouped tag sections */}
+      <div className="space-y-5">
+        {Object.entries(DIGITALFOUNDRY_TAG_GROUPS).map(([group, tags]) => (
+          <div key={group} className="space-y-2">
+            <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
+              {group}
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {tags.map((tag) => {
+                const isSelected = selectedTags.includes(tag);
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => toggleTag(tag)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-lg text-sm font-medium",
+                      "border transition-all duration-150",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                      "cursor-pointer",
+                      isSelected
+                        ? "bg-accent/15 text-accent border-accent shadow-[0_0_10px_rgba(59,130,246,0.2)]"
+                        : "bg-surface-elevated text-text-secondary border-border-subtle hover:border-border hover:text-text-primary"
+                    )}
+                  >
+                    {tag}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
 
       {errors.digitalfoundryTags && (
@@ -66,8 +76,8 @@ export function StepTags({ data, errors, onChange }: StepTagsProps) {
       )}
 
       {selectedTags.length > 0 && (
-        <div className="flex flex-wrap gap-2 pt-2">
-          <span className="text-xs text-text-muted">
+        <div className="flex flex-wrap gap-2 pt-2 border-t border-border-subtle">
+          <span className="text-xs text-text-muted w-full mb-1">
             {selectedTags.length} selected:
           </span>
           {selectedTags.map((tag) => (

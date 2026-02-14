@@ -1,7 +1,7 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import type { FullSubmission } from "@/lib/validators/submission";
+import { CAPABILITY_TYPES, type FullSubmission } from "@/lib/validators/submission";
 
 interface StepReviewProps {
   data: Partial<FullSubmission>;
@@ -17,6 +17,23 @@ const TRL_LABELS: Record<number, string> = {
   7: "TRL 7 - System prototype demonstration in operational environment",
   8: "TRL 8 - System complete and qualified",
   9: "TRL 9 - Actual system proven in operational environment",
+};
+
+const CLASSIFICATION_LABELS: Record<string, string> = {
+  unclassified: "Unclassified",
+  cui: "CUI (Controlled Unclassified)",
+  secret: "Secret",
+  "top-secret": "Top Secret / SCI",
+};
+
+const INTEGRATION_LABELS: Record<string, string> = {
+  api: "API / REST / gRPC",
+  containerized: "Containerized (Docker / K8s)",
+  standalone: "Standalone Application",
+  embedded: "Embedded / On-device",
+  cloud: "Cloud-hosted (SaaS / PaaS)",
+  sdk: "SDK / Library",
+  other: "Other",
 };
 
 function ReviewField({
@@ -45,6 +62,13 @@ export function StepReview({ data }: StepReviewProps) {
       }).format(data.costEstimate)
     : "--";
 
+  const capTypeLabel = CAPABILITY_TYPES.find(
+    (t) => t.value === data.capabilityType
+  )?.label ?? data.capabilityType ?? "--";
+
+  const showSwapC = data.capabilityType === "hardware" || data.capabilityType === "hybrid";
+  const showSoftware = data.capabilityType === "software" || data.capabilityType === "hybrid";
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -59,9 +83,17 @@ export function StepReview({ data }: StepReviewProps) {
 
       {/* Capability Description */}
       <Card variant="default" header="Capability Description">
-        <p className="text-sm text-text-primary whitespace-pre-wrap leading-relaxed">
-          {data.capabilityText || "--"}
-        </p>
+        <dl className="space-y-4">
+          <ReviewField label="Capability Type" value={capTypeLabel} />
+          <div className="space-y-1">
+            <dt className="text-xs font-medium text-text-muted uppercase tracking-wider">
+              Description
+            </dt>
+            <dd className="text-sm text-text-primary whitespace-pre-wrap leading-relaxed">
+              {data.capabilityText || "--"}
+            </dd>
+          </div>
+        </dl>
       </Card>
 
       {/* Technical Specifications */}
@@ -85,15 +117,58 @@ export function StepReview({ data }: StepReviewProps) {
         </dl>
       </Card>
 
-      {/* SWaP-C */}
-      <Card variant="default" header="SWaP-C Requirements">
-        <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <ReviewField label="Size" value={data.swapC?.size} />
-          <ReviewField label="Weight" value={data.swapC?.weight} />
-          <ReviewField label="Power" value={data.swapC?.power} />
-          <ReviewField label="Cooling" value={data.swapC?.cooling} />
-        </dl>
-      </Card>
+      {/* SWaP-C (only for hardware/hybrid) */}
+      {showSwapC && (
+        <Card variant="default" header="SWaP-C Requirements">
+          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <ReviewField label="Size" value={data.swapC?.size} />
+            <ReviewField label="Weight" value={data.swapC?.weight} />
+            <ReviewField label="Power" value={data.swapC?.power} />
+            <ReviewField label="Cooling" value={data.swapC?.cooling} />
+          </dl>
+        </Card>
+      )}
+
+      {/* Software Details (only for software/hybrid) */}
+      {showSoftware && (
+        <Card variant="default" header="Software & Integration Details">
+          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <ReviewField
+              label="Primary Language / Framework"
+              value={data.softwareDetails?.language}
+            />
+            <ReviewField
+              label="Data Classification"
+              value={
+                data.softwareDetails?.classification
+                  ? CLASSIFICATION_LABELS[data.softwareDetails.classification] ?? data.softwareDetails.classification
+                  : undefined
+              }
+            />
+            <ReviewField
+              label="Integration Method"
+              value={
+                data.softwareDetails?.integrationMethod
+                  ? INTEGRATION_LABELS[data.softwareDetails.integrationMethod] ?? data.softwareDetails.integrationMethod
+                  : undefined
+              }
+            />
+            <ReviewField
+              label="Data Requirements"
+              value={data.softwareDetails?.dataRequirements}
+            />
+          </dl>
+        </Card>
+      )}
+
+      {/* Additional Context */}
+      {data.additionalContext && (
+        <Card variant="default" header="Additional Technical Context">
+          <p className="text-sm text-text-primary whitespace-pre-wrap leading-relaxed">
+            {data.additionalContext}
+          </p>
+        </Card>
+      )}
 
       {/* DigitalFoundry Tags */}
       <Card variant="default" header="DigitalFoundry Classification">

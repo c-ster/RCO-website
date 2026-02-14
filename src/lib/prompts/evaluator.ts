@@ -109,19 +109,30 @@ SECNAV PROJECT 33 IMPLEMENTATION GUIDANCE:
 - RIMPAC 2026 and VALIANT SHIELD 2026 are primary integration exercises
 `;
 
+interface TechnicalVitals {
+  capabilityType?: string;
+  trlLevel?: number;
+  costEstimate?: number;
+  deploymentReadyMonths?: number;
+  swapC?: {
+    size?: string;
+    weight?: string;
+    power?: string;
+    cooling?: string;
+  };
+  softwareDetails?: {
+    language?: string;
+    classification?: string;
+    integrationMethod?: string;
+    dataRequirements?: string;
+  };
+  additionalContext?: string;
+  [key: string]: unknown;
+}
+
 interface SubmissionData {
   capabilityText: string;
-  technicalVitals: {
-    trlLevel: number;
-    costEstimate: number;
-    deploymentReadyMonths: number;
-    swapC: {
-      size: string;
-      weight: string;
-      power: string;
-      cooling: string;
-    };
-  };
+  technicalVitals: TechnicalVitals;
   digitalfoundryTags: string[];
 }
 
@@ -147,6 +158,33 @@ export function buildEvaluationPrompt(
         .join("\n")
     : "No host platforms currently registered.";
 
+  const tv = submission.technicalVitals;
+
+  // Build technical vitals section dynamically based on what's available
+  const vitalsLines: string[] = [];
+  if (tv.capabilityType) vitalsLines.push(`- Capability Type: ${tv.capabilityType}`);
+  if (tv.trlLevel != null) vitalsLines.push(`- TRL Level: ${tv.trlLevel}`);
+  if (tv.costEstimate != null) vitalsLines.push(`- Cost Estimate: $${Number(tv.costEstimate).toLocaleString()}`);
+  if (tv.deploymentReadyMonths != null) vitalsLines.push(`- Deployment Ready: ${tv.deploymentReadyMonths} months`);
+
+  // SWaP-C (hardware / hybrid)
+  if (tv.swapC) {
+    if (tv.swapC.size) vitalsLines.push(`- Size: ${tv.swapC.size}`);
+    if (tv.swapC.weight) vitalsLines.push(`- Weight: ${tv.swapC.weight}`);
+    if (tv.swapC.power) vitalsLines.push(`- Power: ${tv.swapC.power}`);
+    if (tv.swapC.cooling) vitalsLines.push(`- Cooling: ${tv.swapC.cooling}`);
+  }
+
+  // Software details (software / hybrid)
+  if (tv.softwareDetails) {
+    if (tv.softwareDetails.language) vitalsLines.push(`- Language / Framework: ${tv.softwareDetails.language}`);
+    if (tv.softwareDetails.classification) vitalsLines.push(`- Data Classification: ${tv.softwareDetails.classification}`);
+    if (tv.softwareDetails.integrationMethod) vitalsLines.push(`- Integration Method: ${tv.softwareDetails.integrationMethod}`);
+    if (tv.softwareDetails.dataRequirements) vitalsLines.push(`- Data Requirements: ${tv.softwareDetails.dataRequirements}`);
+  }
+
+  if (tv.additionalContext) vitalsLines.push(`- Additional Context: ${tv.additionalContext}`);
+
   return `
 STRATEGIC DOCUMENTS:
 ${MOCK_CNO_INSTRUCTIONS}
@@ -158,13 +196,7 @@ SUBMISSION TO EVALUATE:
 Capability Description: ${submission.capabilityText}
 
 Technical Vitals:
-- TRL Level: ${submission.technicalVitals.trlLevel}
-- Cost Estimate: $${submission.technicalVitals.costEstimate.toLocaleString()}
-- Deployment Ready: ${submission.technicalVitals.deploymentReadyMonths} months
-- Size: ${submission.technicalVitals.swapC.size}
-- Weight: ${submission.technicalVitals.swapC.weight}
-- Power: ${submission.technicalVitals.swapC.power}
-- Cooling: ${submission.technicalVitals.swapC.cooling}
+${vitalsLines.join("\n")}
 
 DigitalFoundry Tags: ${submission.digitalfoundryTags.join(", ")}
 

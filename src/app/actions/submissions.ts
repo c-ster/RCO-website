@@ -45,17 +45,23 @@ export async function createSubmission(
 
   const data = result.data;
 
+  // Build technicalVitals JSON with all relevant fields
+  const technicalVitals = {
+    capabilityType: data.capabilityType,
+    trlLevel: data.trlLevel,
+    costEstimate: data.costEstimate,
+    deploymentReadyMonths: data.deploymentReadyMonths,
+    ...(data.swapC ? { swapC: data.swapC } : {}),
+    ...(data.softwareDetails ? { softwareDetails: data.softwareDetails } : {}),
+    ...(data.additionalContext ? { additionalContext: data.additionalContext } : {}),
+  };
+
   // Create submission in database
   const submission = await prisma.submission.create({
     data: {
       userId: session.user.id,
       capabilityText: data.capabilityText,
-      technicalVitals: {
-        trlLevel: data.trlLevel,
-        costEstimate: data.costEstimate,
-        deploymentReadyMonths: data.deploymentReadyMonths,
-        swapC: data.swapC,
-      },
+      technicalVitals: technicalVitals as Record<string, string | number | Record<string, string>>,
       digitalfoundryTags: data.digitalfoundryTags,
       status: "SUBMITTED",
     },
