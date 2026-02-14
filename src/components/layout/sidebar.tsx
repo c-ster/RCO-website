@@ -66,7 +66,7 @@ export function Sidebar({ userRole }: SidebarProps) {
   return (
     <aside className="flex flex-col w-64 h-screen bg-surface border-r border-border-subtle">
       {/* Logo */}
-      <div className="flex items-center gap-3 px-6 py-5 border-b border-border-subtle">
+      <Link href="/" className="flex items-center gap-3 px-6 py-5 border-b border-border-subtle hover:bg-surface-elevated/50 transition-colors">
         <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-accent/20">
           <svg className="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
@@ -76,7 +76,7 @@ export function Sidebar({ userRole }: SidebarProps) {
           <h1 className="text-sm font-bold tracking-wider text-text-primary">NAV-FORGE</h1>
           <p className="text-xs text-text-muted tracking-wide">RCO PORTAL</p>
         </div>
-      </div>
+      </Link>
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1">

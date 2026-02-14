@@ -26,11 +26,18 @@ const TIER_VARIANTS: Record<RecommendationTier, "high" | "partial" | "non-respon
   NON_RESPONSIVE: "non-responsive",
 };
 
+interface SwapC {
+  size?: string;
+  weight?: string;
+  power?: string;
+  cooling?: string;
+}
+
 interface TechnicalVitals {
-  trl?: number;
-  cost?: string;
-  deployment?: string;
-  swapC?: string;
+  trlLevel?: number;
+  costEstimate?: number;
+  deploymentReadyMonths?: number;
+  swapC?: SwapC;
   [key: string]: unknown;
 }
 
@@ -291,49 +298,72 @@ export default async function SubmissionDetailPage({ params }: Props) {
       {technicalVitals && (
         <Card variant="elevated" header="Technical Vitals">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {technicalVitals.trl != null && (
+            {technicalVitals.trlLevel != null && (
               <div className="p-3 rounded-lg bg-surface border border-border-subtle">
                 <p className="text-xs text-text-muted uppercase tracking-wider mb-1">
                   Technology Readiness Level
                 </p>
                 <p className="text-lg font-bold text-text-primary tabular-nums">
-                  TRL {technicalVitals.trl}
+                  TRL {technicalVitals.trlLevel}
                 </p>
               </div>
             )}
-            {technicalVitals.cost && (
+            {technicalVitals.costEstimate != null && (
               <div className="p-3 rounded-lg bg-surface border border-border-subtle">
                 <p className="text-xs text-text-muted uppercase tracking-wider mb-1">
                   Cost Estimate
                 </p>
                 <p className="text-sm font-medium text-text-primary">
-                  {technicalVitals.cost}
+                  ${Number(technicalVitals.costEstimate).toLocaleString()}
                 </p>
               </div>
             )}
-            {technicalVitals.deployment && (
+            {technicalVitals.deploymentReadyMonths != null && (
               <div className="p-3 rounded-lg bg-surface border border-border-subtle">
                 <p className="text-xs text-text-muted uppercase tracking-wider mb-1">
                   Deployment Timeline
                 </p>
                 <p className="text-sm font-medium text-text-primary">
-                  {technicalVitals.deployment}
+                  {technicalVitals.deploymentReadyMonths} months
                 </p>
               </div>
             )}
             {technicalVitals.swapC && (
-              <div className="p-3 rounded-lg bg-surface border border-border-subtle">
-                <p className="text-xs text-text-muted uppercase tracking-wider mb-1">
-                  SWaP-C
+              <div className="p-3 rounded-lg bg-surface border border-border-subtle sm:col-span-2">
+                <p className="text-xs text-text-muted uppercase tracking-wider mb-2">
+                  SWaP-C (Size, Weight, Power &amp; Cooling)
                 </p>
-                <p className="text-sm font-medium text-text-primary">
-                  {technicalVitals.swapC}
-                </p>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  {technicalVitals.swapC.size && (
+                    <div>
+                      <span className="text-text-muted text-xs">Size:</span>{" "}
+                      <span className="text-text-primary">{technicalVitals.swapC.size}</span>
+                    </div>
+                  )}
+                  {technicalVitals.swapC.weight && (
+                    <div>
+                      <span className="text-text-muted text-xs">Weight:</span>{" "}
+                      <span className="text-text-primary">{technicalVitals.swapC.weight}</span>
+                    </div>
+                  )}
+                  {technicalVitals.swapC.power && (
+                    <div>
+                      <span className="text-text-muted text-xs">Power:</span>{" "}
+                      <span className="text-text-primary">{technicalVitals.swapC.power}</span>
+                    </div>
+                  )}
+                  {technicalVitals.swapC.cooling && (
+                    <div>
+                      <span className="text-text-muted text-xs">Cooling:</span>{" "}
+                      <span className="text-text-primary">{technicalVitals.swapC.cooling}</span>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
             {/* Render any additional vitals */}
             {Object.entries(technicalVitals)
-              .filter(([key]) => !["trl", "cost", "deployment", "swapC"].includes(key))
+              .filter(([key]) => !["trlLevel", "costEstimate", "deploymentReadyMonths", "swapC"].includes(key))
               .map(([key, value]) => (
                 <div key={key} className="p-3 rounded-lg bg-surface border border-border-subtle">
                   <p className="text-xs text-text-muted uppercase tracking-wider mb-1">

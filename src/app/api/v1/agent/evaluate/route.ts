@@ -4,6 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { anthropic } from "@/lib/anthropic";
 import { SYSTEM_PROMPT, buildEvaluationPrompt } from "@/lib/prompts/evaluator";
 
+// Allow up to 60 seconds for the AI evaluation
+export const maxDuration = 60;
+
 export async function POST(request: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -71,6 +74,13 @@ export async function POST(request: NextRequest) {
       max_tokens: 4096,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: prompt }],
+    }).catch((err) => {
+      console.error("Anthropic API error details:", {
+        status: err?.status,
+        message: err?.message,
+        type: err?.error?.type,
+      });
+      throw err;
     });
 
     const responseText =
@@ -121,9 +131,17 @@ export async function POST(request: NextRequest) {
       data: { status: "SUBMITTED" },
     });
 
-    console.error("Evaluation failed:", error);
+    const errMsg = error instanceof Error ? error.message : String(error);
+    const errStatus = (error as { status?: number })?.status;
+    console.error("Evaluation failed:", errMsg, errStatus);
     return NextResponse.json(
-      { error: "Evaluation failed. Please try again." },
+      {
+        error: errStatus === 401
+          ? "Anthropic API key is invalid or missing. Check ANTHROPIC_API_KEY."
+          : errStatus === 404
+            ? "Model not found. The specified Claude model may not be available."
+            : `Evaluation failed: ${errMsg}`,
+      },
       { status: 500 },
     );
   }
